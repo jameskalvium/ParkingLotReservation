@@ -26,22 +26,42 @@ public class AvailabilityController {
 
     @GetMapping
     public ResponseEntity<List<SlotAvailabilityResponseDTO>> getAvailableSlots(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
             @RequestParam(required = false) VehicleType vehicleType) {
 
-        List<SlotAvailabilityResponseDTO> availableSlots =
-                availabilityService.getAvailableSlots(startTime, endTime, vehicleType);
-        return ResponseEntity.ok(availableSlots);
+        // Validate required parameters
+        if (startTime == null || endTime == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            List<SlotAvailabilityResponseDTO> availableSlots =
+                    availabilityService.getAvailableSlots(startTime, endTime, vehicleType);
+            return ResponseEntity.ok(availableSlots);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/paginated")
-    public Page<SlotAvailabilityResponseDTO> getAvailableSlotsPaginated(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+    public ResponseEntity<Page<SlotAvailabilityResponseDTO>> getAvailableSlotsPaginated(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
             @RequestParam(required = false) VehicleType vehicleType,
             Pageable pageable) {
 
-        return availabilityService.getAvailableSlotsPaginated(startTime, endTime, vehicleType, pageable);
+        // Validate required parameters
+        if (startTime == null || endTime == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            Page<SlotAvailabilityResponseDTO> availableSlots =
+                    availabilityService.getAvailableSlotsPaginated(startTime, endTime, vehicleType, pageable);
+            return ResponseEntity.ok(availableSlots);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
