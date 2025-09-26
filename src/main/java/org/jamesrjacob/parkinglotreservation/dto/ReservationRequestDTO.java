@@ -21,7 +21,7 @@ public class ReservationRequestDTO {
     @NotNull
     private LocalDateTime endTime;
 
-    // Getters and Setters
+
     public Long getSlotId() { return slotId; }
     public void setSlotId(Long slotId) { this.slotId = slotId; }
 

@@ -65,4 +65,6 @@ public class GlobalExceptionHandler {
         error.put("message", "An unexpected error occurred");
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    
 }

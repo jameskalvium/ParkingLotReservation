@@ -12,7 +12,7 @@ public class SlotAvailabilityResponseDTO {
     private LocalDateTime availableFrom;
     private LocalDateTime availableUntil;
 
-    // Getters & Setters
+
     public Long getSlotId() { return slotId; }
     public void setSlotId(Long slotId) { this.slotId = slotId; }
 

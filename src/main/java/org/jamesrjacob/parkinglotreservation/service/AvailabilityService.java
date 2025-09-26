@@ -38,7 +38,7 @@ public class AvailabilityService {
                                                                         VehicleType vehicleType, Pageable pageable) {
         List<SlotAvailabilityResponseDTO> allSlots = getAvailableSlots(startTime, endTime, vehicleType);
 
-        // Apply sorting
+
         Sort sort = pageable.getSort();
         if (sort.isSorted()) {
             for (Sort.Order order : sort) {
@@ -53,7 +53,7 @@ public class AvailabilityService {
             }
         }
 
-        // Pagination
+
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), allSlots.size());
 

@@ -28,7 +28,7 @@ class SlotRepositoryTest {
 
     @Test
     void findByFloorId_ShouldReturnSlotsForFloor() {
-        // Arrange
+
         Floor floor1 = new Floor();
         floor1.setName("Ground Floor");
         Floor savedFloor1 = entityManager.persistAndFlush(floor1);
@@ -49,10 +49,10 @@ class SlotRepositoryTest {
         slot2.setFloor(savedFloor2);
         entityManager.persistAndFlush(slot2);
 
-        // Act
+
         List<Slot> slots = slotRepository.findByFloorId(savedFloor1.getId());
 
-        // Assert
+
         assertEquals(1, slots.size());
         assertEquals("G-01", slots.get(0).getSlotNumber());
     }
@@ -76,10 +76,10 @@ class SlotRepositoryTest {
         slot2.setFloor(savedFloor);
         entityManager.persistAndFlush(slot2);
 
-        // Act
+
         List<Slot> slots = slotRepository.findByVehicleType(VehicleType.FOUR_WHEELER);
 
-        // Assert
+
         assertEquals(1, slots.size());
         assertEquals(VehicleType.FOUR_WHEELER, slots.get(0).getVehicleType());
     }

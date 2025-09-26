@@ -14,7 +14,7 @@ public class SlotRequestDTO {
     @NotNull
     private Long floorId;
 
-    // Getters and Setters
+
     public String getSlotNumber() { return slotNumber; }
     public void setSlotNumber(String slotNumber) { this.slotNumber = slotNumber; }
 

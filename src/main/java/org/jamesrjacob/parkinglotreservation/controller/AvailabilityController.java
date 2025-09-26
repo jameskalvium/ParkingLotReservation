@@ -30,7 +30,7 @@ public class AvailabilityController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
             @RequestParam(required = false) VehicleType vehicleType) {
 
-        // Validate required parameters
+
         if (startTime == null || endTime == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -51,7 +51,7 @@ public class AvailabilityController {
             @RequestParam(required = false) VehicleType vehicleType,
             Pageable pageable) {
 
-        // Validate required parameters
+
         if (startTime == null || endTime == null) {
             return ResponseEntity.badRequest().build();
         }

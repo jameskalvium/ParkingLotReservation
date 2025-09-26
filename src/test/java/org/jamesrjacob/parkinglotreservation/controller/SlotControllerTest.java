@@ -1,7 +1,8 @@
 package org.jamesrjacob.parkinglotreservation.controller;
 
-import org.jamesrjacob.parkinglotreservation.model.Floor;
-import org.jamesrjacob.parkinglotreservation.model.Slot;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jamesrjacob.parkinglotreservation.dto.SlotRequestDTO;
+import org.jamesrjacob.parkinglotreservation.dto.SlotResponseDTO;
 import org.jamesrjacob.parkinglotreservation.model.VehicleType;
 import org.jamesrjacob.parkinglotreservation.service.SlotService;
 import org.junit.jupiter.api.Test;
@@ -10,14 +11,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SlotController.class)
 class SlotControllerTest {
@@ -25,64 +27,61 @@ class SlotControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean
     private SlotService slotService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void createSlot_ValidRequest_ShouldReturnCreatedSlot() throws Exception {
-        // Arrange
-        Floor floor = new Floor();
-        floor.setId(1L);
+    void createSlot_success() throws Exception {
+        SlotRequestDTO request = new SlotRequestDTO();
+        request.setSlotNumber("A1");
+        request.setVehicleType(VehicleType.TWO_WHEELER);
+        request.setFloorId(1L);
 
-        Slot slot = new Slot();
-        slot.setSlotNumber("G-01");
-        slot.setVehicleType(VehicleType.FOUR_WHEELER);
-        slot.setFloor(floor);
+        SlotResponseDTO response = new SlotResponseDTO();
+        response.setId(1L);
+        response.setSlotNumber("A1");
+        response.setVehicleType(VehicleType.TWO_WHEELER);
+        response.setFloorId(1L);
+        response.setFloorName("Ground Floor");
 
-        Slot savedSlot = new Slot();
-        savedSlot.setId(1L);
-        savedSlot.setSlotNumber("G-01");
-        savedSlot.setVehicleType(VehicleType.FOUR_WHEELER);
-        savedSlot.setFloor(floor);
+        when(slotService.createSlot(any(SlotRequestDTO.class))).thenReturn(response);
 
-        when(slotService.createSlot(any(Slot.class))).thenReturn(savedSlot);
-
-        // Act & Assert
         mockMvc.perform(post("/slots")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(slot)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.slotNumber").value("G-01"))
-                .andExpect(jsonPath("$.vehicleType").value("FOUR_WHEELER"));
+                .andExpect(jsonPath("$.slotNumber").value("A1"))
+                .andExpect(jsonPath("$.vehicleType").value("TWO_WHEELER"))
+                .andExpect(jsonPath("$.floorName").value("Ground Floor"));
     }
 
     @Test
-    void getSlots_ShouldReturnAllSlots() throws Exception {
-        // Arrange
-        Floor floor = new Floor();
-        floor.setId(1L);
-
-        Slot slot1 = new Slot();
+    void getSlots_returnsList() throws Exception {
+        SlotResponseDTO slot1 = new SlotResponseDTO();
         slot1.setId(1L);
-        slot1.setSlotNumber("G-01");
-        slot1.setVehicleType(VehicleType.FOUR_WHEELER);
+        slot1.setSlotNumber("A1");
+        slot1.setVehicleType(VehicleType.TWO_WHEELER);
+        slot1.setFloorId(1L);
+        slot1.setFloorName("Ground Floor");
 
-        Slot slot2 = new Slot();
+        SlotResponseDTO slot2 = new SlotResponseDTO();
         slot2.setId(2L);
-        slot2.setSlotNumber("G-02");
-        slot2.setVehicleType(VehicleType.TWO_WHEELER);
+        slot2.setSlotNumber("B1");
+        slot2.setVehicleType(VehicleType.FOUR_WHEELER);
+        slot2.setFloorId(2L);
+        slot2.setFloorName("First Floor");
 
         when(slotService.getAllSlots()).thenReturn(List.of(slot1, slot2));
 
-        // Act & Assert
-        mockMvc.perform(get("/slots"))
+        mockMvc.perform(get("/slots")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].slotNumber").value("G-01"))
-                .andExpect(jsonPath("$[1].slotNumber").value("G-02"));
+                .andExpect(jsonPath("$[0].slotNumber").value("A1"))
+                .andExpect(jsonPath("$[1].slotNumber").value("B1"));
     }
 }
