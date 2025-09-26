@@ -7,6 +7,15 @@ import java.time.LocalDateTime;
 
 public class TestDataFactory {
 
+    // Use future dates to avoid validation errors
+    public static LocalDateTime futureStartTime() {
+        return LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+    }
+
+    public static LocalDateTime futureEndTime() {
+        return futureStartTime().plusHours(2);
+    }
+
     public static Floor createFloor(Long id, String name) {
         Floor floor = new Floor();
         floor.setId(id);
@@ -33,7 +42,9 @@ public class TestDataFactory {
         reservation.setEndTime(endTime);
         reservation.setSlot(slot);
         reservation.setCost(cost);
-        reservation.setVersion(1L);
+        if (id != null) {
+            reservation.setVersion(1L);
+        }
         return reservation;
     }
 
@@ -47,10 +58,5 @@ public class TestDataFactory {
         dto.setEndTime(endTime);
         dto.setSlotId(slotId);
         return dto;
-    }
-
-    // Helper method to get fixed test time
-    public static LocalDateTime fixedDateTime() {
-        return LocalDateTime.of(2024, 1, 15, 10, 0);
     }
 }

@@ -1,6 +1,7 @@
 package org.jamesrjacob.parkinglotreservation.controller;
 
-import org.jamesrjacob.parkinglotreservation.model.Slot;
+import org.jamesrjacob.parkinglotreservation.dto.SlotRequestDTO;
+import org.jamesrjacob.parkinglotreservation.dto.SlotResponseDTO;
 import org.jamesrjacob.parkinglotreservation.service.SlotService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,12 @@ public class SlotController {
     }
 
     @PostMapping
-    public Slot createSlot(@RequestBody Slot slot) {
-        return slotService.createSlot(slot);
+    public SlotResponseDTO createSlot(@RequestBody SlotRequestDTO slotRequestDTO) {
+        return slotService.createSlot(slotRequestDTO);
     }
 
     @GetMapping
-    public List<Slot> getSlots() {
+    public List<SlotResponseDTO> getSlots() {
         return slotService.getAllSlots();
     }
 }

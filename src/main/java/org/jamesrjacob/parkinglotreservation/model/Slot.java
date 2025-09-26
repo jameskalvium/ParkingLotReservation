@@ -1,9 +1,12 @@
 package org.jamesrjacob.parkinglotreservation.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "slot")
 public class Slot {
 
     @Id
@@ -15,14 +18,16 @@ public class Slot {
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "floor_id")
+    @JsonBackReference
     private Floor floor;
 
+
     @OneToMany(mappedBy = "slot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Reservation> reservations;
 
-    // ✅ Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

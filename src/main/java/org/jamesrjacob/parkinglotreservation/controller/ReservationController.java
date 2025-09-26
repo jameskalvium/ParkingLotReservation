@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/reservations")
@@ -31,14 +32,14 @@ public class ReservationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponseDTO> getReservation(@PathVariable Long id) {
-        return reservationService.getReservation(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<ReservationResponseDTO> reservation = reservationService.getReservation(id);
+        return reservation.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public Page<ReservationResponseDTO> getAllReservations(Pageable pageable) {
-        return reservationService.getAllReservations(pageable);
+    public ResponseEntity<Page<ReservationResponseDTO>> getAllReservations(Pageable pageable) {
+        Page<ReservationResponseDTO> reservations = reservationService.getAllReservations(pageable);
+        return ResponseEntity.ok(reservations);
     }
 
     @DeleteMapping("/{id}")
