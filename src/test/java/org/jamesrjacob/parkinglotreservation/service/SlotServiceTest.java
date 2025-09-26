@@ -1,64 +1,78 @@
 package org.jamesrjacob.parkinglotreservation.service;
 
-import org.jamesrjacob.parkinglotreservation.utils.TestDataFactory;
+import org.jamesrjacob.parkinglotreservation.dto.SlotRequestDTO;
+import org.jamesrjacob.parkinglotreservation.dto.SlotResponseDTO;
 import org.jamesrjacob.parkinglotreservation.model.Floor;
 import org.jamesrjacob.parkinglotreservation.model.Slot;
 import org.jamesrjacob.parkinglotreservation.model.VehicleType;
+import org.jamesrjacob.parkinglotreservation.repository.FloorRepository;
 import org.jamesrjacob.parkinglotreservation.repository.SlotRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class SlotServiceTest {
 
-    @Mock
     private SlotRepository slotRepository;
-
-    @InjectMocks
+    private FloorRepository floorRepository;
     private SlotService slotService;
 
-    @Test
-    void createSlot_ValidSlot_ShouldSaveAndReturn() {
-        // Arrange
-        Floor floor = TestDataFactory.createFloor(1L, "Ground Floor");
-        Slot slot = TestDataFactory.createSlot(null, "G-01", VehicleType.FOUR_WHEELER, floor);
-        Slot savedSlot = TestDataFactory.createSlot(1L, "G-01", VehicleType.FOUR_WHEELER, floor);
-
-        when(slotRepository.save(any(Slot.class))).thenReturn(savedSlot);
-
-        // Act
-        Slot result = slotService.createSlot(slot);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("G-01", result.getSlotNumber());
-        verify(slotRepository).save(slot);
+    @BeforeEach
+    void setUp() {
+        slotRepository = mock(SlotRepository.class);
+        floorRepository = mock(FloorRepository.class);
+        slotService = new SlotService(slotRepository, floorRepository);
     }
 
     @Test
-    void getAllSlots_ShouldReturnAllSlots() {
-        // Arrange
-        Floor floor = TestDataFactory.createFloor(1L, "Ground Floor");
-        Slot slot1 = TestDataFactory.createSlot(1L, "G-01", VehicleType.FOUR_WHEELER, floor);
-        Slot slot2 = TestDataFactory.createSlot(2L, "G-02", VehicleType.TWO_WHEELER, floor);
+    void createSlot_success() {
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
 
-        when(slotRepository.findAll()).thenReturn(List.of(slot1, slot2));
+        SlotRequestDTO request = new SlotRequestDTO();
+        request.setSlotNumber("A1");
+        request.setVehicleType(VehicleType.FOUR_WHEELER);
+        request.setFloorId(1L);
 
-        // Act
-        List<Slot> result = slotService.getAllSlots();
+        when(floorRepository.findById(1L)).thenReturn(Optional.of(floor));
 
-        // Assert
-        assertEquals(2, result.size());
-        verify(slotRepository).findAll();
+        Slot savedSlot = new Slot();
+        savedSlot.setId(1L);
+        savedSlot.setSlotNumber("A1");
+        savedSlot.setVehicleType(VehicleType.FOUR_WHEELER);
+        savedSlot.setFloor(floor);
+
+        when(slotRepository.save(any(Slot.class))).thenReturn(savedSlot);
+
+        SlotResponseDTO response = slotService.createSlot(request);
+
+        assertEquals("A1", response.getSlotNumber());
+        assertEquals("Ground Floor", response.getFloorName());
+        assertEquals(VehicleType.FOUR_WHEELER, response.getVehicleType());
+    }
+
+    @Test
+    void getAllSlots_returnsList() {
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
+
+        Slot slot = new Slot();
+        slot.setId(1L);
+        slot.setSlotNumber("A1");
+        slot.setVehicleType(VehicleType.TWO_WHEELER);
+        slot.setFloor(floor);
+
+        when(slotRepository.findAll()).thenReturn(List.of(slot));
+
+        List<SlotResponseDTO> slots = slotService.getAllSlots();
+        assertEquals(1, slots.size());
+        assertEquals("A1", slots.get(0).getSlotNumber());
     }
 }

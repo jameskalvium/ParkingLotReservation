@@ -1,61 +1,66 @@
 package org.jamesrjacob.parkinglotreservation.service;
 
-import org.jamesrjacob.parkinglotreservation.utils.TestDataFactory;
+import org.jamesrjacob.parkinglotreservation.dto.FloorResponseDTO;
 import org.jamesrjacob.parkinglotreservation.model.Floor;
 import org.jamesrjacob.parkinglotreservation.repository.FloorRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class FloorServiceTest {
 
-    @Mock
-    private FloorRepository floorRepository;
-
-    @InjectMocks
-    private FloorService floorService;
+    private final FloorRepository floorRepository = mock(FloorRepository.class);
+    private final FloorService floorService = new FloorService(floorRepository);
 
     @Test
-    void createFloor_ValidFloor_ShouldSaveAndReturn() {
-        // Arrange
-        Floor floor = TestDataFactory.createFloor(null, "Test Floor");
-        Floor savedFloor = TestDataFactory.createFloor(1L, "Test Floor");
+    void saveFloor_shouldReturnSavedFloor() {
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
 
-        when(floorRepository.save(any(Floor.class))).thenReturn(savedFloor);
+        when(floorRepository.save(floor)).thenReturn(floor);
 
-        // Act
-        Floor result = floorService.createFloor(floor);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Test Floor", result.getName());
-        verify(floorRepository).save(floor);
+        FloorResponseDTO dto = floorService.saveFloor(floor);
+        assertNotNull(dto);
+        assertEquals("Ground Floor", dto.getName());
     }
 
     @Test
-    void getAllFloors_ShouldReturnAllFloors() {
-        // Arrange
-        Floor floor1 = TestDataFactory.createFloor(1L, "Floor 1");
-        Floor floor2 = TestDataFactory.createFloor(2L, "Floor 2");
+    void getAllFloors_shouldReturnList() {
+        Floor floor1 = new Floor();
+        floor1.setId(1L);
+        floor1.setName("Ground Floor");
+
+        Floor floor2 = new Floor();
+        floor2.setId(2L);
+        floor2.setName("First Floor");
 
         when(floorRepository.findAll()).thenReturn(List.of(floor1, floor2));
 
-        // Act
-        List<Floor> result = floorService.getAllFloors();
+        List<FloorResponseDTO> floors = floorService.getAllFloors();
+        assertEquals(2, floors.size());
+    }
 
-        // Assert
-        assertEquals(2, result.size());
-        verify(floorRepository).findAll();
+    @Test
+    void getFloorById_shouldReturnFloor_whenExists() {
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
+
+        when(floorRepository.findById(1L)).thenReturn(Optional.of(floor));
+
+        FloorResponseDTO dto = floorService.getFloorById(1L);
+        assertNotNull(dto);
+        assertEquals("Ground Floor", dto.getName());
+    }
+
+    @Test
+    void getFloorById_shouldReturnNull_whenNotFound() {
+        when(floorRepository.findById(1L)).thenReturn(Optional.empty());
+        assertNull(floorService.getFloorById(1L));
     }
 }

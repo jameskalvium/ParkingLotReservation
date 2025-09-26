@@ -30,7 +30,7 @@ class ReservationRepositoryTest {
 
     @Test
     void findOverlappingReservations_NoOverlap_ShouldReturnEmpty() {
-        // Arrange
+
         Floor floor = new Floor();
         floor.setName("Ground Floor");
         Floor savedFloor = entityManager.persistAndFlush(floor);
@@ -49,14 +49,14 @@ class ReservationRepositoryTest {
         reservation.setCost(60.0);
         entityManager.persistAndFlush(reservation);
 
-        // Act
+
         List<Reservation> overlaps = reservationRepository.findOverlappingReservations(
                 savedSlot.getId(),
                 LocalDateTime.of(2024, 1, 15, 14, 0),
                 LocalDateTime.of(2024, 1, 15, 16, 0)
         );
 
-        // Assert
+
         assertTrue(overlaps.isEmpty());
     }
 
@@ -81,14 +81,14 @@ class ReservationRepositoryTest {
         reservation.setCost(60.0);
         entityManager.persistAndFlush(reservation);
 
-        // Act
+
         List<Reservation> overlaps = reservationRepository.findOverlappingReservations(
                 savedSlot.getId(),
                 LocalDateTime.of(2024, 1, 15, 11, 0),
                 LocalDateTime.of(2024, 1, 15, 13, 0)
         );
 
-        // Assert
+
         assertEquals(1, overlaps.size());
         assertEquals("KA01AB1234", overlaps.get(0).getVehicleNumber());
     }

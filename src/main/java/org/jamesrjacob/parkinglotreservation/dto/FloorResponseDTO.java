@@ -4,7 +4,7 @@ public class FloorResponseDTO {
     private Long id;
     private String name;
 
-    // Getters & Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

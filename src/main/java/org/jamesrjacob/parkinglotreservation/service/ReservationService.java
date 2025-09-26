@@ -32,7 +32,7 @@ public class ReservationService {
         Slot slot = slotRepository.findById(requestDTO.getSlotId())
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
 
-        // Check for overlapping reservations
+
         boolean conflict = reservationRepository.existsBySlotAndTimeRange(
                 slot, requestDTO.getStartTime(), requestDTO.getEndTime()
         );
@@ -40,12 +40,12 @@ public class ReservationService {
             throw new IllegalArgumentException("Slot is already reserved for this time");
         }
 
-        // Calculate duration in hours, rounding up partial hours
+
         long minutes = java.time.Duration.between(requestDTO.getStartTime(), requestDTO.getEndTime()).toMinutes();
         long hours = minutes / 60;
         if (minutes % 60 != 0) hours++;
 
-        // Calculate cost based on vehicle type
+
         double cost = requestDTO.getVehicleType().getHourlyRate() * hours;
 
         // Create reservation

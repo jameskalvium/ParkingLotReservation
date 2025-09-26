@@ -31,20 +31,20 @@ class FloorRepositoryTest {
         floor.setName("Ground Floor");
         Floor savedFloor = entityManager.persistAndFlush(floor);
 
-        // Act
+
         Optional<Floor> foundFloor = floorRepository.findById(savedFloor.getId());
 
-        // Assert
+
         assertTrue(foundFloor.isPresent());
         assertEquals("Ground Floor", foundFloor.get().getName());
     }
 
     @Test
     void findById_NonExistingId_ShouldReturnEmpty() {
-        // Act
+
         Optional<Floor> foundFloor = floorRepository.findById(999L);
 
-        // Assert
+
         assertFalse(foundFloor.isPresent());
     }
 
@@ -54,14 +54,14 @@ class FloorRepositoryTest {
         Floor floor = new Floor();
         floor.setName("Test Floor");
 
-        // Act
+
         Floor savedFloor = floorRepository.save(floor);
 
-        // Assert
+
         assertNotNull(savedFloor.getId());
         assertEquals("Test Floor", savedFloor.getName());
 
-        // Verify it can be retrieved
+
         Optional<Floor> foundFloor = floorRepository.findById(savedFloor.getId());
         assertTrue(foundFloor.isPresent());
     }

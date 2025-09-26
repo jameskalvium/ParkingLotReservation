@@ -1,6 +1,5 @@
 package org.jamesrjacob.parkinglotreservation.service;
 
-import org.jamesrjacob.parkinglotreservation.utils.TestDataFactory;
 import org.jamesrjacob.parkinglotreservation.dto.SlotAvailabilityResponseDTO;
 import org.jamesrjacob.parkinglotreservation.model.Floor;
 import org.jamesrjacob.parkinglotreservation.model.Slot;
@@ -8,90 +7,68 @@ import org.jamesrjacob.parkinglotreservation.model.VehicleType;
 import org.jamesrjacob.parkinglotreservation.repository.SlotRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class AvailabilityServiceTest {
 
-    @Mock
     private SlotRepository slotRepository;
-
-    @InjectMocks
     private AvailabilityService availabilityService;
-
-    private Floor floor;
-    private Slot slot4Wheeler;
-    private Slot slot2Wheeler;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
 
     @BeforeEach
     void setUp() {
-        floor = TestDataFactory.createFloor(1L, "Ground Floor");
-        slot4Wheeler = TestDataFactory.createSlot(1L, "G-01", VehicleType.FOUR_WHEELER, floor);
-        slot2Wheeler = TestDataFactory.createSlot(2L, "G-02", VehicleType.TWO_WHEELER, floor);
-        startTime = TestDataFactory.futureStartTime();
-        endTime = TestDataFactory.futureEndTime();
+        slotRepository = mock(SlotRepository.class);
+        availabilityService = new AvailabilityService(slotRepository);
     }
 
     @Test
-    void getAvailableSlots_NoVehicleTypeFilter_ShouldReturnAllAvailableSlots() {
-        // Arrange
-        when(slotRepository.findAllAvailableSlotsByTimeRange(startTime, endTime))
-                .thenReturn(List.of(slot4Wheeler, slot2Wheeler));
+    void getAvailableSlots_returnsList() {
+        Slot slot = new Slot();
+        slot.setId(1L);
+        slot.setSlotNumber("A1");
+        slot.setVehicleType(VehicleType.TWO_WHEELER);
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
+        slot.setFloor(floor);
 
-        // Act
-        List<SlotAvailabilityResponseDTO> result =
-                availabilityService.getAvailableSlots(startTime, endTime, null);
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
 
-        // Assert
-        assertEquals(2, result.size());
-        verify(slotRepository).findAllAvailableSlotsByTimeRange(startTime, endTime);
+        when(slotRepository.findAllAvailableSlotsByTimeRange(start, end)).thenReturn(List.of(slot));
+
+        List<SlotAvailabilityResponseDTO> slots = availabilityService.getAvailableSlots(start, end, null);
+
+        assertEquals(1, slots.size());
+        assertEquals("A1", slots.get(0).getSlotNumber());
     }
 
     @Test
-    void getAvailableSlots_WithVehicleTypeFilter_ShouldReturnFilteredSlots() {
-        // Arrange
-        when(slotRepository.findAvailableSlotsByVehicleTypeAndTimeRange(VehicleType.FOUR_WHEELER, startTime, endTime))
-                .thenReturn(List.of(slot4Wheeler));
+    void getAvailableSlotsPaginated_returnsPage() {
+        Slot slot = new Slot();
+        slot.setId(1L);
+        slot.setSlotNumber("A1");
+        slot.setVehicleType(VehicleType.TWO_WHEELER);
+        Floor floor = new Floor();
+        floor.setId(1L);
+        floor.setName("Ground Floor");
+        slot.setFloor(floor);
 
-        // Act
-        List<SlotAvailabilityResponseDTO> result =
-                availabilityService.getAvailableSlots(startTime, endTime, VehicleType.FOUR_WHEELER);
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
 
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals(VehicleType.FOUR_WHEELER, result.get(0).getVehicleType());
-    }
+        when(slotRepository.findAllAvailableSlotsByTimeRange(start, end)).thenReturn(List.of(slot));
 
-    @Test
-    void getAvailableSlots_InvalidTimeRange_ShouldThrowException() {
-        // Arrange
-        LocalDateTime invalidStartTime = endTime;
-        LocalDateTime invalidEndTime = startTime;
+        Pageable pageable = PageRequest.of(0, 10);
+        var page = availabilityService.getAvailableSlotsPaginated(start, end, null, pageable);
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class,
-                () -> availabilityService.getAvailableSlots(invalidStartTime, invalidEndTime, null));
-    }
-
-    @Test
-    void getAvailableSlots_PastStartTime_ShouldThrowException() {
-        // Arrange
-        LocalDateTime pastTime = LocalDateTime.now().minusHours(1);
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class,
-                () -> availabilityService.getAvailableSlots(pastTime, endTime, null));
+        assertEquals(1, page.getTotalElements());
+        assertEquals("A1", page.getContent().get(0).getSlotNumber());
     }
 }

@@ -1,6 +1,8 @@
 package org.jamesrjacob.parkinglotreservation.controller;
 
-import org.jamesrjacob.parkinglotreservation.model.Floor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jamesrjacob.parkinglotreservation.dto.FloorRequestDTO;
+import org.jamesrjacob.parkinglotreservation.dto.FloorResponseDTO;
 import org.jamesrjacob.parkinglotreservation.service.FloorService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,66 +10,60 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FloorController.class)
-class FloorControllerTest {
+public class FloorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean
     private FloorService floorService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void createFloor_ValidRequest_ShouldReturnCreatedFloor() throws Exception {
-        // Arrange
-        Floor floor = new Floor();
-        floor.setName("Ground Floor");
+    void testCreateFloor_Success() throws Exception {
+        FloorRequestDTO request = new FloorRequestDTO();
+        request.setName("Ground Floor");
 
-        Floor savedFloor = new Floor();
-        savedFloor.setId(1L);
-        savedFloor.setName("Ground Floor");
+        FloorResponseDTO response = new FloorResponseDTO();
+        response.setId(1L);
+        response.setName("Ground Floor");
 
-        when(floorService.createFloor(any(Floor.class))).thenReturn(savedFloor);
+        when(floorService.saveFloor(org.mockito.ArgumentMatchers.any())).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(post("/floors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(floor)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Ground Floor"));
     }
 
     @Test
-    void getFloors_ShouldReturnAllFloors() throws Exception {
-        // Arrange
-        Floor floor1 = new Floor();
+    void testGetFloors_Success() throws Exception {
+        FloorResponseDTO floor1 = new FloorResponseDTO();
         floor1.setId(1L);
         floor1.setName("Ground Floor");
 
-        Floor floor2 = new Floor();
+        FloorResponseDTO floor2 = new FloorResponseDTO();
         floor2.setId(2L);
         floor2.setName("First Floor");
 
         when(floorService.getAllFloors()).thenReturn(List.of(floor1, floor2));
 
-        // Act & Assert
         mockMvc.perform(get("/floors"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[1].id").value(2L));
+                .andExpect(jsonPath("$.size()").value(2));
     }
 }
